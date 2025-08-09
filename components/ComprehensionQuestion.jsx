@@ -1,170 +1,112 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState } from 'react';
 
-const ComprehensionQuestion = ({
-    question,
-    onAnswer,
-    selectedAnswer,
-    isPreview = false,
-    className = "",
-}) => {
-    const [selectedRating, setSelectedRating] = useState(
-        selectedAnswer || null
-    );
+const ComprehensionQuestion = ({ question, onResponseChange }) => {
+  const [responses, setResponses] = useState({});
 
-    const handleRatingSelect = (rating) => {
-        setSelectedRating(rating);
-        if (onAnswer) {
-            onAnswer(rating);
-        }
-    };
-
-    if (!question) {
-        return (
-            <div className={`space-y-6 ${className}`}>
-                <div className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto">
-                        <svg
-                            className="w-8 h-8 text-purple-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-                            />
-                        </svg>
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-900">
-                        Comprehension Question
-                    </h3>
-                    <p className="text-gray-600">
-                        This question type allows users to rate or evaluate
-                        something on a scale
-                    </p>
-                </div>
-            </div>
-        );
+  const handleOptionSelect = (questionId, selectedOption) => {
+    const newResponses = { ...responses, [questionId]: selectedOption };
+    setResponses(newResponses);
+    if (onResponseChange) {
+      onResponseChange(newResponses);
     }
+  };
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className={`space-y-6 ${className}`}
-        >
-            {/* Question Header */}
-            <div className="text-center space-y-4">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                    {question.title}
-                </h1>
-                {question.subtitle && (
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        {question.subtitle}
-                    </p>
-                )}
-                {question.image && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="flex justify-center"
-                    >
-                        <img
-                            src={question.image}
-                            alt="Question"
-                            className="max-w-md w-full h-auto rounded-lg shadow-md"
-                        />
-                    </motion.div>
-                )}
+  return (
+    <div className="space-y-8">
+      {/* Instructions */}
+      <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+        <p><strong>Instructions:</strong> Read the passage below carefully and then answer the questions that follow.</p>
+      </div>
+
+      {/* Passage */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h4 className="text-lg font-semibold text-gray-900 mb-4">Reading Passage</h4>
+        <div className="prose prose-gray max-w-none">
+          <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+            {question.passage}
+          </p>
+        </div>
+      </div>
+
+      {/* Questions */}
+      <div className="space-y-6">
+        <h4 className="text-lg font-semibold text-gray-900">Questions</h4>
+        {question.questions?.map((subQuestion, index) => (
+          <div key={subQuestion.id} className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="mb-4">
+              <h5 className="text-base font-medium text-gray-900 mb-2">
+                {index + 1}. {subQuestion.question}
+              </h5>
             </div>
 
-            {/* Rating Scale */}
-            <div className="max-w-3xl mx-auto">
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="space-y-6"
-                >
-                    {/* Scale options */}
-                    <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                        {question.options?.map((option, index) => (
-                            <motion.button
-                                key={option.value}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.1 * index }}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => handleRatingSelect(option.value)}
-                                className={`flex flex-col items-center space-y-2 p-4 rounded-lg transition-all duration-200 min-w-[80px] ${
-                                    selectedRating === option.value
-                                        ? "bg-blue-500 text-white shadow-lg"
-                                        : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                                }`}
-                            >
-                                <div
-                                    className={`w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold ${
-                                        selectedRating === option.value
-                                            ? "bg-white text-blue-500"
-                                            : "bg-white text-gray-700"
-                                    }`}
-                                >
-                                    {option.value}
-                                </div>
-                                <span className="text-sm font-medium text-center">
-                                    {option.label}
-                                </span>
-                            </motion.button>
-                        ))}
+            {subQuestion.type === 'multiple-choice' && (
+              <div className="space-y-3">
+                {subQuestion.options?.map((option, optionIndex) => (
+                  <label
+                    key={optionIndex}
+                    className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${
+                      responses[subQuestion.id] === option
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name={subQuestion.id}
+                      value={option}
+                      checked={responses[subQuestion.id] === option}
+                      onChange={() => handleOptionSelect(subQuestion.id, option)}
+                      className="sr-only"
+                    />
+                    <div className={`w-4 h-4 border-2 rounded-full mr-3 flex items-center justify-center ${
+                      responses[subQuestion.id] === option
+                        ? 'border-blue-500'
+                        : 'border-gray-300'
+                    }`}>
+                      {responses[subQuestion.id] === option && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      )}
                     </div>
-
-                    {/* Scale labels */}
-                    {question.options && question.options.length > 0 && (
-                        <div className="flex justify-between text-sm text-gray-500 px-4">
-                            <span>{question.options[0].label}</span>
-                            <span>
-                                {
-                                    question.options[
-                                        question.options.length - 1
-                                    ].label
-                                }
-                            </span>
-                        </div>
-                    )}
-                </motion.div>
-            </div>
-
-            {/* Selected rating display */}
-            {selectedRating !== null && (
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center"
-                >
-                    <p className="text-lg text-gray-600">
-                        You selected:{" "}
-                        <span className="font-semibold text-blue-600">
-                            {selectedRating}
-                        </span>
-                    </p>
-                </motion.div>
+                    <span className="text-gray-700">{option}</span>
+                  </label>
+                ))}
+              </div>
             )}
 
-            {/* Required indicator */}
-            {question.required && (
-                <p className="text-center text-sm text-gray-500">
-                    * This question is required
-                </p>
+            {subQuestion.type === 'text' && (
+              <textarea
+                value={responses[subQuestion.id] || ''}
+                onChange={(e) => handleOptionSelect(subQuestion.id, e.target.value)}
+                placeholder="Type your answer here..."
+                rows={3}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none"
+              />
             )}
-        </motion.div>
-    );
+          </div>
+        ))}
+      </div>
+
+      {/* Progress indicator */}
+      {question.questions && question.questions.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center justify-between text-sm text-blue-800">
+            <span>Progress:</span>
+            <span>
+              {Object.keys(responses).length} of {question.questions.length} questions answered
+            </span>
+          </div>
+          <div className="mt-2 bg-blue-200 rounded-full h-2">
+            <div
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              style={{
+                width: `${(Object.keys(responses).length / question.questions.length) * 100}%`
+              }}
+            ></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default ComprehensionQuestion;

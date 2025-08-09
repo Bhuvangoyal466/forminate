@@ -34,7 +34,7 @@ export default function Home() {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
                         >
-                            <Link href="/builder">
+                            <Link href="/form-builder">
                                 <Button
                                     variant="primary"
                                     size="xl"
@@ -246,7 +246,7 @@ export default function Home() {
                             Join thousands of creators who trust Forminate for
                             their form needs
                         </p>
-                        <Link href="/builder">
+                        <Link href="/form-builder">
                             <Button
                                 variant="secondary"
                                 size="xl"

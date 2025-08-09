@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 const Button = ({
     children,
     variant = "primary",
@@ -34,9 +32,7 @@ const Button = ({
     const classes = `${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`;
 
     return (
-        <motion.button
-            whileHover={{ scale: disabled ? 1 : 1.02 }}
-            whileTap={{ scale: disabled ? 1 : 0.98 }}
+        <button
             className={classes}
             disabled={disabled}
             onClick={onClick}
@@ -44,7 +40,7 @@ const Button = ({
             {...props}
         >
             {children}
-        </motion.button>
+        </button>
     );
 };
 
