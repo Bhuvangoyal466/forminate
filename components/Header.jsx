@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useAuth } from "../contexts/AuthContext";
 
 const Header = () => {
+    const { user, logout, isAuthenticated } = useAuth();
+
     return (
         <motion.header
             className="bg-white border-b border-gray-200 sticky top-0 z-30"
@@ -43,14 +46,44 @@ const Header = () => {
 
                     {/* CTA Buttons */}
                     <div className="flex items-center space-x-4">
-                        <button className="text-gray-600 hover:text-gray-900 transition-colors px-3 py-2">
-                            Sign In
-                        </button>
-                        <Link href="/form-builder">
-                            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                Create Form
-                            </button>
-                        </Link>
+                        {isAuthenticated ? (
+                            <>
+                                <div className="hidden md:flex items-center space-x-3">
+                                    <div className="text-sm text-gray-600">
+                                        Welcome,{" "}
+                                        <span className="font-medium text-gray-900">
+                                            {user?.name}
+                                        </span>
+                                    </div>
+                                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                                        <span className="text-white text-sm font-medium">
+                                            {user?.name
+                                                ?.charAt(0)
+                                                .toUpperCase()}
+                                        </span>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={logout}
+                                    className="text-gray-600 hover:text-gray-900 transition-colors px-3 py-2"
+                                >
+                                    Sign Out
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link href="/signin">
+                                    <button className="text-gray-600 hover:text-gray-900 transition-colors px-3 py-2">
+                                        Sign In
+                                    </button>
+                                </Link>
+                                <Link href="/signup">
+                                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                        Sign Up
+                                    </button>
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
