@@ -5,7 +5,7 @@ import Layout from "../../components/Layout";
 import Button from "../../components/Button";
 import ProgressBar from "../../components/ProgressBar";
 import PreviewQuestion from "../../components/PreviewQuestion";
-import { fetchFormById, submitFormResponse } from "../../lib/api";
+import { fetchFormById, fetchFormForPreview, submitFormResponse } from "../../lib/api";
 import { toast } from "react-toastify";
 
 export default function PreviewForm() {
@@ -29,7 +29,17 @@ export default function PreviewForm() {
     const loadForm = async () => {
         try {
             setIsLoading(true);
-            const formData = await fetchFormById(id);
+            let formData;
+            
+            try {
+                // First try to load as preview (for authenticated users viewing their own forms)
+                formData = await fetchFormForPreview(id);
+            } catch (previewError) {
+                // If preview fails, fall back to public form access
+                console.log("Preview failed, trying public access:", previewError);
+                formData = await fetchFormById(id);
+            }
+            
             setForm(formData);
         } catch (error) {
             console.error("Failed to load form:", error);
@@ -213,21 +223,7 @@ export default function PreviewForm() {
                 </div>
             </div>
 
-            {/* Form Header */}
-            {form.headerImage && currentQuestionIndex === 0 && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="max-w-4xl mx-auto px-4 py-8"
-                >
-                    <img
-                        src={form.headerImage}
-                        alt="Form header"
-                        className="w-full h-64 object-cover rounded-lg shadow-lg"
-                    />
-                </motion.div>
-            )}
-
+            {/* Form Content */}
             {/* Form Title */}
             {currentQuestionIndex === 0 && (
                 <motion.div

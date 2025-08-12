@@ -129,7 +129,6 @@ Visit `http://localhost:3000` to see your application!
   description: String,
   slug: String (unique),
   userId: ObjectId,
-  headerImage: String,
   settings: Object,
   questions: Array,
   analytics: Object,

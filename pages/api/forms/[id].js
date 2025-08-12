@@ -35,7 +35,14 @@ async function getForm(req, res, id) {
             return sendErrorResponse(res, 403, "Access denied");
         }
 
-        sendSuccessResponse(res, form, "Form retrieved successfully");
+        // Create a lightweight version for response to avoid 4MB limit
+        const { createdBy, ...lightweightForm } = form;
+
+        sendSuccessResponse(
+            res,
+            lightweightForm,
+            "Form retrieved successfully"
+        );
     } catch (error) {
         console.error("Get form error:", error);
         sendErrorResponse(res, 500, "Internal server error");

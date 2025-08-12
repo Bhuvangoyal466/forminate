@@ -62,7 +62,6 @@
   description: String,
   slug: String (unique, required), // For public URLs
   userId: ObjectId (ref: 'users', required), // Form creator
-  headerImage: String (optional),
   
   // Form Configuration
   settings: {

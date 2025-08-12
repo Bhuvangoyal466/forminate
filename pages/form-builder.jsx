@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import Layout from "../components/Layout";
 import Button from "../components/Button";
-import HeaderImageUploader from "../components/HeaderImageUploader";
 import QuestionEditor from "../components/QuestionEditor";
 import QuestionCard from "../components/QuestionCard";
 import { motion } from "framer-motion";
@@ -12,7 +11,6 @@ export default function FormBuilder() {
     const router = useRouter();
     const [form, setForm] = useState({
         title: "",
-        headerImage: null,
         questions: [],
     });
     const [isEditing, setIsEditing] = useState(null);
@@ -159,14 +157,6 @@ export default function FormBuilder() {
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
-
-                    {/* Header Image */}
-                    <HeaderImageUploader
-                        image={form.headerImage}
-                        onImageChange={(image) =>
-                            setForm((prev) => ({ ...prev, headerImage: image }))
-                        }
-                    />
                 </motion.div>
 
                 {/* Questions */}

@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { useAuth } from "../../contexts/AuthContext";
 import Layout from "../../components/Layout";
 import Button from "../../components/Button";
-import HeaderImageUploader from "../../components/HeaderImageUploader";
 import QuestionEditor from "../../components/QuestionEditor";
 import QuestionCard from "../../components/QuestionCard";
 import { motion } from "framer-motion";
@@ -17,7 +16,6 @@ export default function FormBuilderEdit() {
     const [form, setForm] = useState({
         title: "",
         description: "",
-        headerImage: null,
         questions: [],
     });
     const [isEditing, setIsEditing] = useState(null);
@@ -298,15 +296,6 @@ export default function FormBuilderEdit() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
-                            <HeaderImageUploader
-                                image={form.headerImage}
-                                onImageChange={(image) =>
-                                    setForm((prev) => ({
-                                        ...prev,
-                                        headerImage: image,
-                                    }))
-                                }
-                            />
                         </div>
                     </motion.div>
 
