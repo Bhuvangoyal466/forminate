@@ -91,4 +91,13 @@ async function deleteForm(req, res, id) {
     }
 }
 
+// Increase body size limit for forms with images and multiple questions
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: "10mb",
+        },
+    },
+};
+
 export default withAuth(handler);

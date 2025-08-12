@@ -1,4 +1,8 @@
-import { FormModel, SubmissionModel, UserModel } from "../../../../lib/models.js";
+import {
+    FormModel,
+    SubmissionModel,
+    UserModel,
+} from "../../../../lib/models.js";
 import {
     sendErrorResponse,
     sendSuccessResponse,
@@ -117,3 +121,12 @@ export default function handler(req, res) {
         }
     });
 }
+
+// Increase body size limit for form submissions with file uploads
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: "10mb",
+        },
+    },
+};
