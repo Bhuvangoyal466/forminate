@@ -5,6 +5,8 @@ import Layout from "../components/Layout";
 import Button from "../components/Button";
 import { useRouter } from "next/router";
 import { useAuth } from "../contexts/AuthContext";
+import apiClient from "../lib/api";
+import { toast } from "react-toastify";
 
 export default function SignIn() {
     const router = useRouter();
@@ -31,27 +33,26 @@ export default function SignIn() {
         setError("");
 
         try {
-            const response = await fetch("/api/auth/signin", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData),
-            });
+            const response = await apiClient.signIn(
+                formData.email,
+                formData.password
+            );
 
-            const data = await response.json();
-
-            if (response.ok) {
+            if (response.success) {
                 // Use auth context to handle login
-                login(data.user, data.token);
+                login(response.data.user, response.data.token);
+                toast.success("Successfully signed in!");
 
-                // Redirect to form builder or dashboard
-                router.push("/form-builder");
+                // Redirect to dashboard
+                router.push("/dashboard");
             } else {
-                setError(data.message || "Something went wrong");
+                setError(response.error || "Something went wrong");
+                toast.error(response.error || "Sign in failed");
             }
         } catch (error) {
-            setError("Network error. Please try again.");
+            const errorMessage = "Network error. Please try again.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }

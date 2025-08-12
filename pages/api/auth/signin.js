@@ -1,94 +1,82 @@
-import fs from "fs";
-import path from "path";
+import { UserModel } from "../../../lib/models.js";
+import {
+    validators,
+    sendErrorResponse,
+    sendSuccessResponse,
+    rateLimit,
+} from "../../../lib/auth.js";
 
-// Helper function to read users from JSON file
-const getUsersFromFile = () => {
-    try {
-        const filePath = path.join(process.cwd(), "data", "users.json");
-        const fileContent = fs.readFileSync(filePath, "utf8");
-        return JSON.parse(fileContent);
-    } catch (error) {
-        return { users: [] };
-    }
-};
-
-// Helper function to write users to JSON file
-const writeUsersToFile = (data) => {
-    try {
-        const filePath = path.join(process.cwd(), "data", "users.json");
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-        return true;
-    } catch (error) {
-        console.error("Error writing users file:", error);
-        return false;
-    }
-};
-
-// Helper function to generate a simple token (in production, use JWT)
-const generateToken = (user) => {
-    return Buffer.from(
-        JSON.stringify({
-            id: user.id,
-            email: user.email,
-            timestamp: Date.now(),
-        })
-    ).toString("base64");
-};
+// Rate limiting: 5 attempts per 15 minutes per IP
+const rateLimiter = rateLimit(15 * 60 * 1000, 5);
 
 export default function handler(req, res) {
-    if (req.method !== "POST") {
-        return res.status(405).json({ message: "Method not allowed" });
-    }
-
-    const { email, password } = req.body;
-
-    // Basic validation
-    if (!email || !password) {
-        return res
-            .status(400)
-            .json({ message: "Email and password are required" });
-    }
-
-    try {
-        const data = getUsersFromFile();
-        const user = data.users.find((u) => u.email === email);
-
-        if (!user) {
-            return res
-                .status(401)
-                .json({ message: "Invalid email or password" });
+    // Apply rate limiting
+    rateLimiter(req, res, async () => {
+        if (req.method !== "POST") {
+            return sendErrorResponse(res, 405, "Method not allowed");
         }
 
-        // In a real app, you'd hash and compare passwords
-        if (user.password !== password) {
-            return res
-                .status(401)
-                .json({ message: "Invalid email or password" });
+        try {
+            const { email, password } = req.body;
+
+            // Validation
+            if (!email || !password) {
+                return sendErrorResponse(
+                    res,
+                    400,
+                    "Email and password are required"
+                );
+            }
+
+            if (!validators.email(email)) {
+                return sendErrorResponse(res, 400, "Invalid email format");
+            }
+
+            // Find user
+            const user = await UserModel.findByEmail(email.toLowerCase());
+            if (!user) {
+                return sendErrorResponse(res, 401, "Invalid credentials");
+            }
+
+            // Verify password
+            const isValidPassword = await UserModel.verifyPassword(
+                password,
+                user.password
+            );
+            if (!isValidPassword) {
+                return sendErrorResponse(res, 401, "Invalid credentials");
+            }
+
+            // Check if email is verified (optional, depends on your requirements)
+            // if (!user.emailVerified) {
+            //     return sendErrorResponse(res, 401, 'Please verify your email before signing in');
+            // }
+
+            // Update last login
+            await UserModel.updateLastLogin(user._id);
+
+            // Generate token
+            const token = UserModel.generateToken(user);
+
+            // Remove sensitive data
+            const {
+                password: _,
+                emailVerificationToken,
+                passwordResetToken,
+                ...safeUser
+            } = user;
+
+            sendSuccessResponse(
+                res,
+                {
+                    user: safeUser,
+                    token,
+                },
+                "Signed in successfully"
+            );
+        } catch (error) {
+            console.error("Sign in error:", error);
+            sendErrorResponse(res, 500, "Internal server error");
         }
-
-        // Update last login
-        user.lastLogin = new Date().toISOString();
-
-        // Update user in file
-        const userIndex = data.users.findIndex((u) => u.id === user.id);
-        if (userIndex !== -1) {
-            data.users[userIndex] = user;
-            writeUsersToFile(data);
-        }
-
-        // Generate token
-        const token = generateToken(user);
-
-        // Remove password from response
-        const { password: _, ...userWithoutPassword } = user;
-
-        res.status(200).json({
-            message: "Sign in successful",
-            user: userWithoutPassword,
-            token,
-        });
-    } catch (error) {
-        console.error("Sign in error:", error);
-        res.status(500).json({ message: "Internal server error" });
-    }
+    });
 }

@@ -6,6 +6,7 @@ import Button from "../../components/Button";
 import ProgressBar from "../../components/ProgressBar";
 import PreviewQuestion from "../../components/PreviewQuestion";
 import { fetchFormById, submitFormResponse } from "../../lib/api";
+import { toast } from "react-toastify";
 
 export default function PreviewForm() {
     const router = useRouter();
@@ -32,6 +33,7 @@ export default function PreviewForm() {
             setForm(formData);
         } catch (error) {
             console.error("Failed to load form:", error);
+            toast.error("Failed to load form");
             router.push("/");
         } finally {
             setIsLoading(false);
@@ -82,10 +84,11 @@ export default function PreviewForm() {
         setIsSubmitting(true);
         try {
             await submitFormResponse(id, responses);
+            toast.success("Form submitted successfully!");
             setIsCompleted(true);
         } catch (error) {
             console.error("Failed to submit form:", error);
-            alert("Failed to submit form. Please try again.");
+            toast.error("Failed to submit form. Please try again.");
         } finally {
             setIsSubmitting(false);
         }

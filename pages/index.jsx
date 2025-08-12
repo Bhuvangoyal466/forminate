@@ -155,7 +155,7 @@ export default function Home() {
                                 <Button
                                     variant="outline"
                                     size="xl"
-                                    className="px-10 py-5 text-lg font-semibold border-2 border-gray-300 hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
+                                    className="px-10 py-5 text-lg font-semibold border-2 border-gray-300 hover:transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
                                 >
                                     <svg
                                         className="w-5 h-5 mr-2"

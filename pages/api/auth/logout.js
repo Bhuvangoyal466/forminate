@@ -1,13 +1,14 @@
+import { sendSuccessResponse } from "../../../lib/auth.js";
+
 export default function handler(req, res) {
     if (req.method !== "POST") {
         return res.status(405).json({ message: "Method not allowed" });
     }
 
-    // In a real app, you'd invalidate the token in your database
-    // For now, we'll just return a success response
-    // The client will handle clearing localStorage
+    // Since we're using JWT tokens, logout is handled client-side
+    // The client will remove the token from localStorage
+    // In a production app with refresh tokens, you might want to
+    // blacklist the token here
 
-    res.status(200).json({
-        message: "Logout successful",
-    });
+    sendSuccessResponse(res, null, "Logged out successfully");
 }

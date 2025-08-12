@@ -3,32 +3,60 @@ import { useRouter } from "next/router";
 import { motion } from "framer-motion";
 import Layout from "../../components/Layout";
 import Button from "../../components/Button";
-import { fetchFormById, fetchFormResponses } from "../../lib/api";
+import { useAuth } from "../../contexts/AuthContext";
+import apiClient from "../../lib/api";
+import { toast } from "react-toastify";
 
 export default function Responses() {
     const router = useRouter();
     const { id } = router.query;
+    const { isAuthenticated, loading } = useAuth();
     const [form, setForm] = useState(null);
     const [responses, setResponses] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedResponse, setSelectedResponse] = useState(null);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (id) {
+        if (!loading && !isAuthenticated) {
+            router.push("/signin");
+            return;
+        }
+
+        if (id && isAuthenticated) {
             loadData();
         }
-    }, [id]);
+    }, [id, isAuthenticated, loading, router]);
 
     const loadData = async () => {
         try {
-            const [formData, responsesData] = await Promise.all([
-                fetchFormById(id),
-                fetchFormResponses(id),
-            ]);
-            setForm(formData);
-            setResponses(responsesData);
+            setIsLoading(true);
+
+            // Fetch form details
+            const formResponse = await apiClient.getForm(id);
+            if (formResponse.success) {
+                setForm(formResponse.data);
+            } else {
+                const errorMessage = "Failed to load form details";
+                setError(errorMessage);
+                toast.error(errorMessage);
+                return;
+            }
+
+            // Fetch submissions
+            const submissionsResponse = await apiClient.getFormSubmissions(id);
+            if (submissionsResponse.success) {
+                setResponses(submissionsResponse.data.submissions || []);
+            } else {
+                const errorMessage = "Failed to load form responses";
+                setError(errorMessage);
+                toast.error(errorMessage);
+            }
         } catch (error) {
-            console.error("Failed to load data:", error);
+            console.error("Error fetching data:", error);
+            const errorMessage = "Failed to load form responses";
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -59,8 +87,10 @@ export default function Responses() {
             headers.join(","),
             ...responses.map((response) =>
                 [
-                    response.id,
-                    formatDate(response.submittedAt),
+                    response._id,
+                    formatDate(
+                        response.submissionTime?.completed || response.createdAt
+                    ),
                     ...form.questions.map((q) => {
                         const answer = response.responses[q.id];
                         return typeof answer === "string"
@@ -88,6 +118,35 @@ export default function Responses() {
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
                         <p className="text-gray-600">Loading responses...</p>
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
+
+    if (error) {
+        return (
+            <Layout>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center">
+                        <svg
+                            className="mx-auto h-12 w-12 text-red-400 mb-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.464 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                            />
+                        </svg>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                            Error Loading Data
+                        </h2>
+                        <p className="text-gray-600 mb-4">{error}</p>
+                        <Button onClick={loadData}>Try Again</Button>
                     </div>
                 </div>
             </Layout>
@@ -347,11 +406,13 @@ export default function Responses() {
                                             className="hover:bg-gray-50"
                                         >
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                #{response.id.substring(0, 8)}
+                                                #{response._id.substring(0, 8)}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {formatDate(
-                                                    response.submittedAt
+                                                    response.submissionTime
+                                                        ?.completed ||
+                                                        response.createdAt
                                                 )}
                                             </td>
                                             {form.questions
@@ -398,7 +459,7 @@ export default function Responses() {
                             <div className="flex items-center justify-between p-6 border-b border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-900">
                                     Response #
-                                    {selectedResponse.id.substring(0, 8)}
+                                    {selectedResponse._id.substring(0, 8)}
                                 </h3>
                                 <button
                                     onClick={() => setSelectedResponse(null)}
@@ -425,7 +486,9 @@ export default function Responses() {
                                     <p className="text-sm text-gray-500">
                                         Submitted on{" "}
                                         {formatDate(
-                                            selectedResponse.submittedAt
+                                            selectedResponse.submissionTime
+                                                ?.completed ||
+                                                selectedResponse.createdAt
                                         )}
                                     </p>
                                 </div>

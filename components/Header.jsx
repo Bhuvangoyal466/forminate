@@ -48,6 +48,12 @@ const Header = () => {
                     <div className="flex items-center space-x-4">
                         {isAuthenticated ? (
                             <>
+                                <Link
+                                    href="/dashboard"
+                                    className="text-gray-600 hover:text-gray-900 transition-colors duration-200 px-3 py-2"
+                                >
+                                    Dashboard
+                                </Link>
                                 <div className="hidden md:flex items-center space-x-3">
                                     <div className="text-sm text-gray-600">
                                         Welcome,{" "}

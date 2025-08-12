@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import apiClient from "../lib/api";
+import { toast } from "react-toastify";
 
 const AuthContext = createContext();
 
@@ -28,6 +30,7 @@ export const AuthProvider = ({ children }) => {
 
             if (storedUser && storedToken) {
                 setUser(JSON.parse(storedUser));
+                apiClient.setToken(storedToken);
             }
         } catch (error) {
             console.error("Error checking auth:", error);
@@ -43,13 +46,23 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("token", token);
+        apiClient.setToken(token);
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
-        router.push("/");
+    const logout = async () => {
+        try {
+            await apiClient.signOut();
+            toast.success("Successfully signed out!");
+        } catch (error) {
+            console.error("Logout error:", error);
+            toast.error("Error during sign out");
+        } finally {
+            setUser(null);
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+            apiClient.setToken(null);
+            router.push("/");
+        }
     };
 
     const value = {

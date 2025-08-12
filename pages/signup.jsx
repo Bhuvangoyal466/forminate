@@ -5,6 +5,8 @@ import Layout from "../components/Layout";
 import Button from "../components/Button";
 import { useRouter } from "next/router";
 import { useAuth } from "../contexts/AuthContext";
+import apiClient from "../lib/api";
+import { toast } from "react-toastify";
 
 export default function SignUp() {
     const router = useRouter();
@@ -34,43 +36,43 @@ export default function SignUp() {
 
         // Basic validation
         if (formData.password !== formData.confirmPassword) {
-            setError("Passwords do not match");
+            const errorMessage = "Passwords do not match";
+            setError(errorMessage);
+            toast.error(errorMessage);
             setLoading(false);
             return;
         }
 
         if (formData.password.length < 6) {
-            setError("Password must be at least 6 characters long");
+            const errorMessage = "Password must be at least 6 characters long";
+            setError(errorMessage);
+            toast.error(errorMessage);
             setLoading(false);
             return;
         }
 
         try {
-            const response = await fetch("/api/auth/signup", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    name: formData.name,
-                    email: formData.email,
-                    password: formData.password,
-                }),
-            });
+            const response = await apiClient.signUp(
+                formData.name,
+                formData.email,
+                formData.password
+            );
 
-            const data = await response.json();
-
-            if (response.ok) {
+            if (response.success) {
                 // Use auth context to handle login
-                login(data.user, data.token);
+                login(response.data.user, response.data.token);
+                toast.success("Account created successfully!");
 
-                // Redirect to form builder or dashboard
-                router.push("/form-builder");
+                // Redirect to dashboard
+                router.push("/dashboard");
             } else {
-                setError(data.message || "Something went wrong");
+                setError(response.error || "Something went wrong");
+                toast.error(response.error || "Sign up failed");
             }
         } catch (error) {
-            setError("Network error. Please try again.");
+            const errorMessage = "Network error. Please try again.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }

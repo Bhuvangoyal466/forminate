@@ -6,6 +6,7 @@ import HeaderImageUploader from "../components/HeaderImageUploader";
 import QuestionEditor from "../components/QuestionEditor";
 import QuestionCard from "../components/QuestionCard";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 export default function FormBuilder() {
     const router = useRouter();
@@ -116,12 +117,13 @@ export default function FormBuilder() {
 
             if (response.ok) {
                 const savedForm = await response.json();
+                toast.success("Form saved successfully!");
                 router.push(`/preview/${savedForm.id}`);
             } else {
-                alert("Failed to save form");
+                toast.error("Failed to save form");
             }
         } catch (error) {
-            alert("Error saving form");
+            toast.error("Error saving form");
         } finally {
             setIsSaving(false);
         }
