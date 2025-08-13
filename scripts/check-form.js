@@ -6,30 +6,30 @@ const { FormModel } = require("../lib/models.js");
 async function checkAndPublishForm(formId) {
     try {
         console.log(`Checking form: ${formId}`);
-        
+
         // Try to find the form
         const form = await FormModel.findById(formId);
-        
+
         if (!form) {
             console.log("❌ Form not found");
             return;
         }
-        
+
         console.log(`✅ Form found: "${form.title}"`);
         console.log(`📄 Status: ${form.status}`);
         console.log(`🔗 Slug: ${form.slug}`);
         console.log(`🌐 Public: ${form.settings?.isPublic}`);
         console.log(`👤 User ID: ${form.userId}`);
-        
+
         if (form.status !== "published") {
             console.log("\n🚀 Form is not published. Publishing now...");
-            
+
             const updateResult = await FormModel.update(
                 formId,
                 { status: "published" },
                 form.userId.toString()
             );
-            
+
             if (updateResult.modifiedCount > 0) {
                 console.log("✅ Form published successfully!");
                 console.log(`🔗 Public URL: /api/f/${form.slug}`);
@@ -42,7 +42,6 @@ async function checkAndPublishForm(formId) {
             console.log(`🔗 Public URL: /api/f/${form.slug}`);
             console.log(`🔗 Preview URL: /preview/${formId}`);
         }
-        
     } catch (error) {
         console.error("Error:", error);
     }

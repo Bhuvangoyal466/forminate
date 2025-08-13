@@ -78,6 +78,46 @@ const Dashboard = () => {
         }
     };
 
+    const handlePublish = async (formId) => {
+        try {
+            const response = await apiClient.publishForm(formId);
+            if (response.success) {
+                toast.success("Form published successfully!");
+                // Refresh the forms list
+                const updatedForms = forms.map((form) =>
+                    form._id === formId
+                        ? { ...form, status: "published" }
+                        : form
+                );
+                setForms(updatedForms);
+            } else {
+                toast.error(response.error || "Failed to publish form");
+            }
+        } catch (error) {
+            console.error("Error publishing form:", error);
+            toast.error("Failed to publish form");
+        }
+    };
+
+    const handleUnpublish = async (formId) => {
+        try {
+            const response = await apiClient.unpublishForm(formId);
+            if (response.success) {
+                toast.success("Form unpublished successfully!");
+                // Refresh the forms list
+                const updatedForms = forms.map((form) =>
+                    form._id === formId ? { ...form, status: "draft" } : form
+                );
+                setForms(updatedForms);
+            } else {
+                toast.error(response.error || "Failed to unpublish form");
+            }
+        } catch (error) {
+            console.error("Error unpublishing form:", error);
+            toast.error("Failed to unpublish form");
+        }
+    };
+
     if (loading || isLoading) {
         return (
             <Layout>
@@ -378,6 +418,31 @@ const Dashboard = () => {
                                                     >
                                                         Edit
                                                     </Link>
+
+                                                    {form.status === "draft" ? (
+                                                        <button
+                                                            onClick={() =>
+                                                                handlePublish(
+                                                                    form._id
+                                                                )
+                                                            }
+                                                            className="text-green-600 hover:text-green-900"
+                                                        >
+                                                            Publish
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() =>
+                                                                handleUnpublish(
+                                                                    form._id
+                                                                )
+                                                            }
+                                                            className="text-orange-600 hover:text-orange-900"
+                                                        >
+                                                            Unpublish
+                                                        </button>
+                                                    )}
+
                                                     {form.status ===
                                                         "published" && (
                                                         <Link

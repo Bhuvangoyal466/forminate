@@ -5,7 +5,11 @@ import Layout from "../../components/Layout";
 import Button from "../../components/Button";
 import ProgressBar from "../../components/ProgressBar";
 import PreviewQuestion from "../../components/PreviewQuestion";
-import { fetchFormById, fetchFormForPreview, submitFormResponse } from "../../lib/api";
+import {
+    fetchFormById,
+    fetchFormForPreview,
+    submitFormResponse,
+} from "../../lib/api";
 import { toast } from "react-toastify";
 
 export default function PreviewForm() {
@@ -30,16 +34,19 @@ export default function PreviewForm() {
         try {
             setIsLoading(true);
             let formData;
-            
+
             try {
                 // First try to load as preview (for authenticated users viewing their own forms)
                 formData = await fetchFormForPreview(id);
             } catch (previewError) {
                 // If preview fails, fall back to public form access
-                console.log("Preview failed, trying public access:", previewError);
+                console.log(
+                    "Preview failed, trying public access:",
+                    previewError
+                );
                 formData = await fetchFormById(id);
             }
-            
+
             setForm(formData);
         } catch (error) {
             console.error("Failed to load form:", error);

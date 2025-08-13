@@ -118,25 +118,6 @@ export default function SignIn() {
                                 </p>
                             </div>
 
-                            {/* Demo credentials */}
-                            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                                <p className="text-sm font-medium text-blue-800 mb-2">
-                                    Demo Credentials:
-                                </p>
-                                <p className="text-sm text-blue-700">
-                                    Email:{" "}
-                                    <span className="font-mono font-bold">
-                                        demo@forminate.com
-                                    </span>
-                                </p>
-                                <p className="text-sm text-blue-700">
-                                    Password:{" "}
-                                    <span className="font-mono font-bold">
-                                        password123
-                                    </span>
-                                </p>
-                            </div>
-
                             {/* Form */}
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div>

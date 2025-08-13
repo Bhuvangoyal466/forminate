@@ -1,5 +1,9 @@
 import { FormModel } from "../../../../lib/models.js";
-import { withAuth, sendErrorResponse, sendSuccessResponse } from "../../../../lib/auth.js";
+import {
+    withAuth,
+    sendErrorResponse,
+    sendSuccessResponse,
+} from "../../../../lib/auth.js";
 
 async function handler(req, res) {
     if (req.method !== "GET") {
@@ -12,7 +16,7 @@ async function handler(req, res) {
 
         // Find the form by ID and ensure it belongs to the authenticated user
         const form = await FormModel.findById(id);
-        
+
         if (!form) {
             return sendErrorResponse(res, 404, "Form not found");
         }
@@ -23,7 +27,11 @@ async function handler(req, res) {
         }
 
         // Return the form data for preview (no status restrictions for owners)
-        sendSuccessResponse(res, form, "Form retrieved successfully for preview");
+        sendSuccessResponse(
+            res,
+            form,
+            "Form retrieved successfully for preview"
+        );
     } catch (error) {
         console.error("Form preview error:", error);
         sendErrorResponse(res, 500, "Internal server error");
